@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📸 AI 照片美學評分 (高度模擬)</title>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         /* ------ CSS 美化設定 (部分保留，部分增強) ------ */
         :root {
@@ -47,7 +46,7 @@
             position: relative; /* 為了截圖遮罩 */
         }
 
-        /* **修改處 1: 強化 H1 標題樣式** */
+        /* 強化 H1 標題樣式 */
         h1 { 
             margin-top: 0; 
             font-size: 2.2rem; /* 字體更大 */
@@ -199,7 +198,7 @@
         .btn-retry { background: #e2e8f0; color: #475569; }
         .btn:active { transform: scale(0.96); }
 
-        /* 截圖遮罩 */
+        /* 截圖遮罩 - 不再使用，但保留樣式防止佈局錯誤 */
         .screenshot-mask {
             position: absolute;
             bottom: -2.5rem; 
@@ -212,7 +211,7 @@
             border-radius: 0 0 28px 28px;
         }
         .app-container.screenshot-mode .screenshot-mask {
-            display: block;
+            display: none; /* 確保隱藏 */
         }
     </style>
 </head>
@@ -257,7 +256,7 @@
             </div>
 
             <div class="btn-group">
-                <button class="btn btn-share" onclick="shareResult()">🚀 分享評分</button>
+                <button class="btn btn-share" onclick="shareResult()">🚀 複製分享文字</button> 
                 <button class="btn btn-retry" onclick="resetApp()">🔄 再次評分</button>
             </div>
             
@@ -273,7 +272,7 @@
             document.getElementById('fileInput').click();
         }
 
-        // 模擬 AI 分析步驟的專業訊息 (新增)
+        // 模擬 AI 分析步驟的專業訊息 
         const loadingMessages = [
             "正在讀取高解析度圖像數據...",
             "執行 VGG16 結構化特征提取...",
@@ -287,7 +286,7 @@
 
         let loadingInterval;
 
-        // 1. 中文分數轉換邏輯 (保留)
+        // 1. 中文分數轉換邏輯 
         function getChineseGrade(score) {
             if (score >= 95) return '甲上';
             if (score >= 90) return '甲';
@@ -298,7 +297,7 @@
             return '丙';
         }
 
-        // 2. 結構化評語生成 (讓評分看起來有依據)
+        // 2. 結構化評語生成 
         function generateDetailedComment(score) {
             const grade = getChineseGrade(score);
             // 隨機產生子分數，但讓它們貼近總分，以增加合理性
@@ -427,76 +426,36 @@
                 `conic-gradient(${dynamicColor} ${deg}deg, #e2e8f0 0deg)`;
         }
 
-        // 7. 分享功能 (使用 html2canvas 截圖並強化分享文字)
+        // 7. 分享功能 (只複製文字內容)
         async function shareResult() {
-            const appContainer = document.getElementById('appContainer');
-            const shareButton = document.querySelector('.btn-share');
-            const retryButton = document.querySelector('.btn-retry');
             const scoreText = document.getElementById('scoreText').innerText;
             const gradeText = document.getElementById('chineseGradeDisplay').innerText;
             
-            // 1. 隱藏按鈕，顯示遮罩 (為了截圖時畫面乾淨)
-            retryButton.style.opacity = '0';
-            shareButton.style.opacity = '0';
-            appContainer.classList.add('screenshot-mode');
-
-            await new Promise(r => setTimeout(r, 100)); 
+            // 由於 commentText 包含 HTML 標籤，我們使用 innerText 取得純文字內容
+            const commentBoxContent = document.getElementById('commentText').innerText; 
             
-            // 2. 截圖
-            html2canvas(appContainer, {
-                useCORS: true, 
-                scale: 2, 
-                logging: false, 
-                backgroundColor: null,
-            }).then(canvas => {
-                // 3. 恢復按鈕
-                retryButton.style.opacity = '1';
-                shareButton.style.opacity = '1';
-                appContainer.classList.remove('screenshot-mode');
+            // 從純文字內容中，只取第一個換行符號前的內容作為摘要，避免複製過長的詳細報告
+            const overallComment = commentBoxContent.split('\n')[0].trim();
 
-                const image = canvas.toDataURL("image/png");
-                
-                // 強化分享文字，強調有趣性/分數
-                const shareText = `我的照片剛被 AI 評分了！😱 竟然拿到了 **${scoreText} 分 (${gradeText})**！這個分數實在太有趣了，快來看看你的照片能得幾分！`;
-                
-                // 嘗試使用原生分享 API (手機)
-                if (navigator.share) {
-                    canvas.toBlob(function(blob) {
-                        const file = new File([blob], 'AI_Photo_Rating.png', { type: 'image/png' });
-                        navigator.share({
-                            files: [file],
-                            title: '我的照片 AI 評分結果！',
-                            text: shareText
-                        }).catch(error => console.log('分享失敗', error));
-                    }, 'image/png');
-                } else {
-                    // 如果不支援原生分享 (電腦)，則下載圖片並複製完整的文字內容
-                    const link = document.createElement('a');
-                    link.download = 'AI_Photo_Rating.png';
-                    link.href = image;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    // 複製完整的評語、分數和網址
-                    const fullShareContent = `${shareText}\n\n👉 點擊連結來評分：${window.location.href}`;
-                    
-                    navigator.clipboard.writeText(fullShareContent)
-                        .then(() => {
-                            alert('評分結果圖片已下載，分數和評語已複製到剪貼簿！');
-                        })
-                        .catch(err => {
-                            console.error('複製失敗:', err);
-                            alert('評分結果圖片已下載，但複製內容到剪貼簿失敗，請手動複製網址。');
-                        });
-                }
-            }).catch(error => {
-                console.error("截圖失敗:", error);
-                retryButton.style.opacity = '1';
-                shareButton.style.opacity = '1';
-                appContainer.classList.remove('screenshot-mode');
-                alert('截圖失敗，請稍後再試。');
-            });
+            // 1. 組合分享內容
+            const shareTitle = `我的照片剛被 AI 評分了！😱 竟然拿到了 **${scoreText} 分 (${gradeText})**！`;
+            const shareCommentSummary = `🤖 AI 報告總結：${overallComment}`;
+            const shareLink = `\n\n👉 點擊連結來評分：${window.location.href}`;
+            
+            // 完整的複製內容
+            const fullShareContent = `${shareTitle}\n${shareCommentSummary}${shareLink}`;
+            
+            // 2. 複製到剪貼簿
+            navigator.clipboard.writeText(fullShareContent)
+                .then(() => {
+                    // 顯示成功提示
+                    alert('✅ 評分和連結已成功複製到剪貼簿！現在可以貼給朋友了！');
+                })
+                .catch(err => {
+                    console.error('複製失敗:', err);
+                    // 顯示失敗提示
+                    alert('複製內容到剪貼簿失敗，請手動複製網址。');
+                });
         }
 
         // 8. 重置 (再次評分)
@@ -508,7 +467,7 @@
             if (loadingInterval) clearInterval(loadingInterval); 
         }
 
-        // 9. 拖曳上傳功能 (與上次相同，建議保留)
+        // 9. 拖曳上傳功能
         const uploadZone = document.getElementById('uploadZone');
         uploadZone.addEventListener('dragover', (e) => {
             e.preventDefault();
