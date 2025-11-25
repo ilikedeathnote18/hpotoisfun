@@ -1,6 +1,32 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+
+<script>
+    // 禁止右鍵選單
+    document.addEventListener('contextmenu', function (e) {
+        e.preventDefault();
+        alert('🔒 本網頁受智慧財產權保護，禁止檢視原始碼');
+    });
+
+    // 禁止常用開發者快捷鍵 (F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U)
+    document.onkeydown = function (e) {
+        if (event.keyCode == 123) { // F12
+            return false;
+        }
+        if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { // Ctrl+Shift+I
+            return false;
+        }
+        if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { // Ctrl+Shift+J
+            return false;
+        }
+        if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { // Ctrl+U
+            return false;
+        }
+    }
+</script>
+
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📸 AI 評分你的照片</title>
@@ -73,8 +99,6 @@
             100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
         .effect-bad {
-            /* ★★★ 修改處 2：震動動畫持續時間將由 JS 動態控制 ★★★ */
-            /* animation: shake 0.5s; <-- 移除這行 */
             border-color: #ef4444 !important; /* 紅色邊框 */
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.6) !important; /* 紅色光暈 */
         }
@@ -96,8 +120,7 @@
             100% { box-shadow: 0 0 20px #ffd700, 0 0 40px #ff8c00; border-color: #ffd700; }
         }
         .effect-perfect {
-            /* ★★★ 修改處 3：光芒動畫持續時間將由 JS 動態控制 ★★★ */
-            /* animation: holy-glow 1.5s infinite alternate; <-- 移除這行 */
+            
         }
 
         /* ----------------------------------------- */
@@ -235,6 +258,17 @@
         .btn-retry:active { transform: translateY(1px); box-shadow: inset 0 2px 5px rgba(0,0,0,0.3); }
 
         .screenshot-mask { display: none; }
+
+        /* ★★★ 新增：作者浮水印樣式 ★★★ */
+        .author-watermark {
+            margin-top: 1rem;       /* 與上方 UI 的間距 */
+            color: var(--text-muted); /* 使用次要文字顏色 (灰色) */
+            font-size: 0.85rem;     /* 小字體 */
+            opacity: 0.7;           /* 半透明效果 */
+            letter-spacing: 1px;    /* 字元間距 */
+            font-weight: 500;
+            user-select: none;      /* 防止使用者選取到這個文字 (選用) */
+        }
     </style>
 </head>
 <body>
@@ -285,6 +319,10 @@
             <div class="screenshot-mask"></div>
         </div>
     </div>
+    <footer class="author-watermark">
+        IG:ilikedeathnote
+    </footer>
+
 
     <script>
         // ------ JavaScript 邏輯 ------
