@@ -33,7 +33,8 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
+            /* ★★★ 修改處 1：增加左右 Padding，避免 UI 貼邊 ★★★ */
+            padding: 20px 5%; /* 上下 20px，左右 5% */
             box-sizing: border-box;
             line-height: 1.6;
             overflow-x: hidden; /* 防止特效撐開卷軸 */
@@ -70,7 +71,8 @@
             100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
         .effect-bad {
-            animation: shake 0.5s;
+            /* ★★★ 修改處 2：震動動畫持續時間將由 JS 動態控制 ★★★ */
+            /* animation: shake 0.5s; <-- 移除這行 */
             border-color: #ef4444 !important; /* 紅色邊框 */
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.6) !important; /* 紅色光暈 */
         }
@@ -92,7 +94,8 @@
             100% { box-shadow: 0 0 20px #ffd700, 0 0 40px #ff8c00; border-color: #ffd700; }
         }
         .effect-perfect {
-            animation: holy-glow 1.5s infinite alternate;
+            /* ★★★ 修改處 3：光芒動畫持續時間將由 JS 動態控制 ★★★ */
+            /* animation: holy-glow 1.5s infinite alternate; <-- 移除這行 */
         }
 
         /* ----------------------------------------- */
@@ -273,8 +276,8 @@
             </div>
 
             <div class="btn-group">
-                <button class="btn btn-share" onclick="shareResult()">🚀 分享成績給朋友</button> 
-                <button class="btn btn-retry" onclick="resetApp()">↺ 在上訴一張</button>
+                <button class="btn btn-share" onclick="shareResult()">🚀 複製分享文字</button> 
+                <button class="btn btn-retry" onclick="resetApp()">↺ 重新評測</button>
             </div>
             
             <div class="screenshot-mask"></div>
@@ -298,6 +301,7 @@
         ];
 
         let loadingInterval;
+        let effectTimeout; // 用來儲存特效結束的計時器
 
         function getChineseGrade(score) {
             if (score >= 95) return '甲上';
@@ -429,24 +433,29 @@
 
             // ★★★ 判斷並觸發特效 ★★★
             if (score >= 90) {
-                // 90分以上：高分慶祝
                 triggerPerfectEffect();
             } else if (score >= 80) {
-                // 80-89分：還不錯
                 triggerGoodEffect();
             } else {
-                // 80分以下：再接再厲
                 triggerBadEffect();
             }
         }
 
         // --- 特效函式區 ---
+        
+        // ★★★ 新增：產生 4-8 秒隨機持續時間的函式 ★★★
+        function getRandomDuration() {
+            return Math.floor(Math.random() * (8000 - 4000 + 1) + 4000); // 4000ms ~ 8000ms
+        }
 
         function triggerPerfectEffect() {
-            document.getElementById('appContainer').classList.add('effect-perfect');
-            
-            // 噴發拉炮
-            var duration = 3 * 1000;
+            const container = document.getElementById('appContainer');
+            container.classList.add('effect-perfect');
+            // ★★★ 修改處 4：設定 CSS 動畫持續時間為隨機 ★★★
+            const duration = getRandomDuration();
+            container.style.animation = `holy-glow 1.5s infinite alternate`; // 重新套用動畫設定
+
+            // 噴發拉炮 (持續隨機時間)
             var animationEnd = Date.now() + duration;
             var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
             var random = function(min, max) { return Math.random() * (max - min) + min; };
@@ -460,6 +469,13 @@
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.1, 0.3), y: Math.random() - 0.2 } }));
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.7, 0.9), y: Math.random() - 0.2 } }));
             }, 250);
+
+            // ★★★ 新增：隨機時間後移除特效 ★★★
+            if (effectTimeout) clearTimeout(effectTimeout);
+            effectTimeout = setTimeout(() => {
+                container.classList.remove('effect-perfect');
+                container.style.animation = 'none'; // 清除動畫
+            }, duration);
         }
 
         function triggerGoodEffect() {
@@ -468,15 +484,27 @@
 
         function triggerBadEffect() {
             const container = document.getElementById('appContainer');
-            // 強制重繪以觸發震動動畫
             container.classList.remove('effect-bad');
             void container.offsetWidth; 
             container.classList.add('effect-bad');
+            
+            // ★★★ 修改處 5：設定 CSS 動畫持續時間為隨機 ★★★
+            const duration = getRandomDuration();
+            container.style.animation = `shake 0.5s infinite`; // 讓它持續震動
+
+            // ★★★ 新增：隨機時間後移除特效 ★★★
+            if (effectTimeout) clearTimeout(effectTimeout);
+            effectTimeout = setTimeout(() => {
+                container.classList.remove('effect-bad');
+                container.style.animation = 'none'; // 清除動畫
+            }, duration);
         }
 
         function removeEffects() {
             const container = document.getElementById('appContainer');
             container.classList.remove('effect-perfect', 'effect-good', 'effect-bad');
+            container.style.animation = 'none'; // 清除所有 JS 設定的動畫
+            if (effectTimeout) clearTimeout(effectTimeout); // 清除計時器
         }
 
         // ------------------
