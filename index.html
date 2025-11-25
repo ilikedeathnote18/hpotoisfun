@@ -11,14 +11,14 @@
             --primary: #4f46e5;     /* 主色調：靛藍 */
             --bg: #f8fafc;          /* 背景色 */
             --surface: #ffffff;     /* 卡片背景 */
-            --text: #1e293b;        /* 文字色 */
-            --grade-bg: #eef2ff;    /* 中文分數背景 */
-            --grade-text: #3730a3;  /* 中文分數文字 */
+            --text: #1e293b;        /* 文字色 (深色) */
+            --grade-bg: #eef2ff;    /* 中文分數背景 (備用，現已用動態色取代) */
+            --grade-text: #3730a3;  /* 中文分數文字 (備用，現已用 --text 取代) */
             
             /* 新增：動態分數顏色 */
             --score-color-high: #22c55e; /* 高分綠 */
-            --score-color-mid: #f59e0b;  /* 中分黃 */
-            --score-color-low: #ef4444;  /* 低分紅 */
+            --score-color-mid: #f59e0b;  /* 中分黃 */
+            --score-color-low: #ef4444;  /* 低分紅 */
         }
 
         body {
@@ -47,7 +47,15 @@
             position: relative; /* 為了截圖遮罩 */
         }
 
-        h1 { margin-top: 0; font-size: 1.8rem; color: #0f172a; }
+        /* **修改處 1: 強化 H1 標題樣式** */
+        h1 { 
+            margin-top: 0; 
+            font-size: 2.2rem; /* 字體更大 */
+            font-weight: 900; /* 字體更粗 */
+            color: #0f172a; 
+            line-height: 1.2; 
+            letter-spacing: 1px; 
+        }
 
         /* 1. 上傳區塊 */
         .upload-zone {
@@ -130,40 +138,40 @@
             box-shadow: 0 6px 15px rgba(0,0,0,0.25); background-color: white;
             border: 4px solid white; /* 讓分數圈有立體感 */
         }
-        .score-val { 
+        .score-val { 
             font-size: 2.8rem; /* 放大分數數字 */
-            font-weight: 800; 
-            color: var(--primary); 
-            line-height: 1; 
+            font-weight: 800; 
+            color: var(--primary); /* 固定使用主色調，與圓環動態色區隔 */
+            line-height: 1; 
         }
         .score-label {
-             font-size: 0.8rem; 
-             color: #475569;
-             margin-top: 5px;
+            font-size: 0.8rem; 
+            color: #475569;
+            margin-top: 5px;
         }
         
         /* 中文分數樣式 (要求更大更顯眼) */
         .grade-display {
             margin-top: 25px; /* 拉開與數值分數的距離 */
-            padding: 10px 25px; 
-            background: var(--grade-bg); 
-            color: var(--grade-text);
-            border-radius: 30px; 
+            padding: 10px 25px; 
+            /* background 將在 JS 中動態設定 */
+            color: var(--text); /* 固定使用深色文字，確保與淡色背景對比清晰 */
+            border-radius: 30px; 
             font-size: 1.8rem; /* **極度放大** */
-            font-weight: 700; 
+            font-weight: 700; 
             letter-spacing: 2px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         /* 評語 (結構化顯示) */
         .comment-box {
-            background: #f1f5f9; 
+            background: #f1f5f9; 
             padding: 1.5rem; /* 增大 padding */
             border-radius: 18px; /* 增大圓角 */
-            margin-bottom: 2rem; 
-            text-align: left; 
+            margin-bottom: 2rem; 
+            text-align: left; 
             font-size: 1rem;
-            line-height: 1.7; 
+            line-height: 1.7; 
             color: #334155;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
         }
@@ -194,13 +202,13 @@
         /* 截圖遮罩 */
         .screenshot-mask {
             position: absolute;
-            bottom: -2.5rem; 
-            left: -2.5rem; 
+            bottom: -2.5rem; 
+            left: -2.5rem; 
             right: -2.5rem;
-            height: 9rem; 
-            background-color: var(--surface); 
+            height: 9rem; 
+            background-color: var(--surface); 
             z-index: 100;
-            display: none; 
+            display: none; 
             border-radius: 0 0 28px 28px;
         }
         .app-container.screenshot-mode .screenshot-mask {
@@ -211,7 +219,8 @@
 <body>
 
     <div class="app-container" id="appContainer">
-        <h1>📸 AI 照片美學評分</h1>
+        
+        <h1>AI評分你的照片~~!!!</h1>
 
         <div class="upload-zone" id="uploadZone" onclick="triggerFileInput()">
             <span class="upload-icon">⬆️</span>
@@ -289,14 +298,14 @@
             return '丙';
         }
 
-        // 2. 結構化評語生成 (新增：讓評分看起來有依據)
+        // 2. 結構化評語生成 (讓評分看起來有依據)
         function generateDetailedComment(score) {
             const grade = getChineseGrade(score);
             // 隨機產生子分數，但讓它們貼近總分，以增加合理性
             const subScores = {
-                composition: Math.min(100, Math.floor(score * 0.9 + Math.random() * 20 - 10)), 
-                lighting: Math.min(100, Math.floor(score * 1.1 + Math.random() * 20 - 10)), 
-                color: Math.min(100, Math.floor(score * 1.0 + Math.random() * 15 - 7)) 
+                composition: Math.min(100, Math.floor(score * 0.9 + Math.random() * 20 - 10)), 
+                lighting: Math.min(100, Math.floor(score * 1.1 + Math.random() * 20 - 10)), 
+                color: Math.min(100, Math.floor(score * 1.0 + Math.random() * 15 - 7)) 
             };
 
             const generateText = (subScore, criteria) => {
@@ -332,7 +341,7 @@
         }
 
 
-        // 4. 開始 AI 階段式分析 (模擬載入過程) (新增)
+        // 4. 開始 AI 階段式分析 (模擬載入過程)
         function startLoadingSequence(duration) {
             const loadingTextElement = document.getElementById('loadingText');
             let index = 0;
@@ -398,21 +407,24 @@
             document.getElementById('chineseGradeDisplay').innerText = chineseGrade;
             document.getElementById('commentText').innerHTML = data.commentHtml; // 使用 innerHTML 顯示結構化內容
 
-            // 根據分數決定統一的主色
-            let color;
-            if (score >= 85) color = 'var(--score-color-high)'; // 綠
-            else if (score >= 70) color = 'var(--score-color-mid)'; // 黃
-            else color = 'var(--score-color-low)'; // 紅
+            // 根據分數決定統一的主色 (用於圓環和中文分數背景)
+            let dynamicColor;
+            if (score >= 85) dynamicColor = 'var(--score-color-high)'; // 綠
+            else if (score >= 70) dynamicColor = 'var(--score-color-mid)'; // 黃
+            else dynamicColor = 'var(--score-color-low)'; // 紅
             
             // 應用顏色
-            document.getElementById('scoreText').style.color = color;
-            document.getElementById('chineseGradeDisplay').style.background = `color-mix(in srgb, ${color} 20%, white)`; // 淡色背景
-            document.getElementById('chineseGradeDisplay').style.color = color;
-            
-            // 圓環進度條
+            // 1. 分數數字：固定使用主色調 (var(--primary))
+            document.getElementById('scoreText').style.color = 'var(--primary)';
+
+            // 2. 中文分數：背景使用動態顏色，文字固定為深色
+            document.getElementById('chineseGradeDisplay').style.background = `color-mix(in srgb, ${dynamicColor} 20%, white)`;
+            document.getElementById('chineseGradeDisplay').style.color = 'var(--text)';
+
+            // 3. 圓環進度條：使用動態顏色
             const deg = score * 3.6;
             document.getElementById('scoreCircleBg').style.background = 
-                `conic-gradient(${color} ${deg}deg, #e2e8f0 0deg)`;
+                `conic-gradient(${dynamicColor} ${deg}deg, #e2e8f0 0deg)`;
         }
 
         // 7. 分享功能 (使用 html2canvas 截圖並強化分享文字)
@@ -458,7 +470,7 @@
                         }).catch(error => console.log('分享失敗', error));
                     }, 'image/png');
                 } else {
-                    // 如果不支援原生分享 (電腦)，則下載圖片並複製文字
+                    // 如果不支援原生分享 (電腦)，則下載圖片並複製完整的文字內容
                     const link = document.createElement('a');
                     link.download = 'AI_Photo_Rating.png';
                     link.href = image;
@@ -466,8 +478,17 @@
                     link.click();
                     document.body.removeChild(link);
                     
-                    navigator.clipboard.writeText(`${shareText}\n${window.location.href}`);
-                    alert('評分結果圖片已下載，分數和連結已複製到剪貼簿！');
+                    // 複製完整的評語、分數和網址
+                    const fullShareContent = `${shareText}\n\n👉 點擊連結來評分：${window.location.href}`;
+                    
+                    navigator.clipboard.writeText(fullShareContent)
+                        .then(() => {
+                            alert('評分結果圖片已下載，分數和評語已複製到剪貼簿！');
+                        })
+                        .catch(err => {
+                            console.error('複製失敗:', err);
+                            alert('評分結果圖片已下載，但複製內容到剪貼簿失敗，請手動複製網址。');
+                        });
                 }
             }).catch(error => {
                 console.error("截圖失敗:", error);
