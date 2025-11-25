@@ -6,7 +6,7 @@
     // 禁止右鍵選單
     document.addEventListener('contextmenu', function (e) {
         e.preventDefault();
-        alert('🔒 本網頁受智慧財產權保護，禁止檢視原始碼');
+        alert('💥發生甚麼事???看不到吧😍😍😍');
     });
 
     // 禁止常用開發者快捷鍵 (F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U)
@@ -59,8 +59,7 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            /* ★★★ 修改處 1：增加左右 Padding，避免 UI 貼邊 ★★★ */
-            padding: 20px 5%; /* 上下 20px，左右 5% */
+            padding: 20px 5%; /* 左右內縮 */
             box-sizing: border-box;
             line-height: 1.6;
             overflow-x: hidden; /* 防止特效撐開卷軸 */
@@ -76,13 +75,12 @@
             box-shadow: 10px 10px 20px rgba(0,0,0,0.4), -2px -2px 10px rgba(255,255,255,0.05);
             text-align: center;
             position: relative;
-            border: 2px solid #3d3d3d; /* 稍微加粗邊框以便顯示特效顏色 */
+            border: 2px solid #3d3d3d; 
             transition: all 0.3s ease;
-            /* 確保容器不會壓到下面的浮水印 */
             margin-bottom: 1rem; 
         }
 
-        /* ----------- ✨ 特效動畫區 (新增) ----------- */
+        /* ----------- ✨ 特效動畫區 ----------- */
 
         /* 1. 震動 (低分) */
         @keyframes shake {
@@ -119,9 +117,7 @@
             50% { box-shadow: 0 0 40px #ffd700, 0 0 80px #ff8c00; border-color: #fff; }
             100% { box-shadow: 0 0 20px #ffd700, 0 0 40px #ff8c00; border-color: #ffd700; }
         }
-        .effect-perfect {
-            
-        }
+        .effect-perfect { }
 
         /* ----------------------------------------- */
 
@@ -233,20 +229,53 @@
             border: 1px solid #d9780f;
         }
 
+        /* ★★★ 評語區樣式 (專業版) ★★★ */
         .comment-box {
             background: var(--bg-inset);
             padding: 1.5rem;
             border-radius: 16px;
             margin-bottom: 2rem;
             text-align: left;
-            font-size: 1rem;
-            line-height: 1.7;
-            color: #ccc;
             box-shadow: var(--shadow-inset);
             border: 1px solid #333;
         }
-        .comment-box strong { color: var(--accent-color); font-weight: 700; display: block; margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
-        .comment-box .criteria-title { font-weight: 700; color: #fff; margin-top: 15px; margin-bottom: 5px; font-size: 0.95rem; border-left: 3px solid var(--accent-color); padding-left: 10px; }
+        /* 標題 */
+        .analysis-header {
+            color: var(--accent-color);
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #444;
+            padding-bottom: 0.5rem;
+        }
+        /* 單個項目 */
+        .analysis-item {
+            margin-bottom: 1.2rem;
+        }
+        /* 項目名稱 */
+        .analysis-title {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+        /* 小分數 */
+        .score-tag {
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            margin-left: 5px;
+        }
+        /* 條列式說明 */
+        .analysis-points {
+            margin: 0;
+            padding-left: 1.2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            list-style-type: disc;
+        }
+        .analysis-points li {
+            margin-bottom: 0.2rem;
+        }
 
         .btn-group { display: flex; gap: 15px; margin-top: 2rem; }
         .btn { flex: 1; padding: 16px; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; text-shadow: 0 1px 0 rgba(255,255,255,0.2); }
@@ -259,15 +288,14 @@
 
         .screenshot-mask { display: none; }
 
-        /* ★★★ 新增：作者浮水印樣式 ★★★ */
         .author-watermark {
-            margin-top: 1rem;       /* 與上方 UI 的間距 */
-            color: var(--text-muted); /* 使用次要文字顏色 (灰色) */
-            font-size: 0.85rem;     /* 小字體 */
-            opacity: 0.7;           /* 半透明效果 */
-            letter-spacing: 1px;    /* 字元間距 */
+            margin-top: 1rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            opacity: 0.7;
+            letter-spacing: 1px;
             font-weight: 500;
-            user-select: none;      /* 防止使用者選取到這個文字 (選用) */
+            user-select: none;
         }
     </style>
 </head>
@@ -307,8 +335,8 @@
             </div>
 
             <div class="comment-box">
-                <strong>🤖 AI 分析報告：</strong>
-                <div id="commentText">資料讀取中...</div>
+                <div class="analysis-header">📷 評分細項（專業攝影角度）</div>
+                <div id="commentContent">資料讀取中...</div>
             </div>
 
             <div class="btn-group">
@@ -319,15 +347,15 @@
             <div class="screenshot-mask"></div>
         </div>
     </div>
+
     <footer class="author-watermark">
         IG:ilikedeathnote
     </footer>
 
-
     <script>
         // ------ JavaScript 邏輯 ------
 
-        // ★★★ 請將這裡換成您剛剛複製的 Google Web App URL ★★★
+        // ★★★ 請確認您的 Google Web App URL ★★★
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqUngcxhgsnGbD6paqPx4uac3rgnXlaraCEUmlxenpvAnca9EM0HezSNdhoJyZQsSR/exec"; 
 
         function triggerFileInput() {
@@ -341,7 +369,127 @@
         ];
 
         let loadingInterval;
-        let effectTimeout; // 用來儲存特效結束的計時器
+        let effectTimeout;
+        let currentShareSummary = ""; // 儲存總結供分享使用
+
+        // --- 專業評語資料庫 ---
+        const commentDatabase = {
+            composition: {
+                high: [
+                    "主體位置絕佳，運用了經典的三分法，視覺平衡感極好。",
+                    "視角獨特，採用了低角度平視，賦予主體強烈的存在感。",
+                    "前景的虛化處理增加了畫面的層次與深度，引導視線集中。",
+                    "構圖簡潔有力，留白恰到好處，給予觀者充分的想像空間。"
+                ],
+                mid: [
+                    "整體構圖平穩，但稍顯中規中矩，可嘗試更大膽的視角。",
+                    "主體明確，但背景略顯雜亂，稍稍干擾了視覺焦點。",
+                    "平衡感尚可，建議在水平線的控制上可以更精準一些。",
+                    "嘗試了對稱構圖，但左右配重略有偏差，細節可再微調。"
+                ],
+                low: [
+                    "構圖略顯鬆散，主體在畫面中的位置不夠突出。",
+                    "畫面元素過多，導致視覺焦點分散，建議做減法。",
+                    "水平線明顯傾斜，影響了畫面的穩定感。",
+                    "邊緣裁切到了關鍵細節，影響了整體的完整性。"
+                ]
+            },
+            lighting: {
+                high: [
+                    "光線運用極佳，明暗過渡自然，立體感十足。",
+                    "利用了優美的側逆光，勾勒出主體輪廓，氛圍感滿分。",
+                    "曝光控制精準，高光與陰影的細節都保留得非常完整。",
+                    "漫射光線柔和，膚色或物體質感呈現得非常細膩。"
+                ],
+                mid: [
+                    "整體曝光正常，但在高光區域稍有溢出，細節略失。",
+                    "光線方向明確，但陰影部分稍微過重，建議補光。",
+                    "對比度尚可，但光線質感略顯生硬，缺乏層次。",
+                    "室內光線分佈均勻，但缺乏主光，導致畫面略顯平淡。"
+                ],
+                low: [
+                    "整體曝光不足，暗部細節嚴重流失，畫面偏晦暗。",
+                    "光線過於強烈直射，造成了生硬的陰影與反光。",
+                    "白平衡偏差較大，導致畫面色溫不自然。",
+                    "背光拍攝下主體全黑，未能有效補光或保留輪廓。"
+                ]
+            },
+            tone: {
+                high: [
+                    "色調統一且富有電影感，極好地烘托了當下的氛圍。",
+                    "冷暖對比運用得當，視覺衝擊力強，色彩和諧。",
+                    "整體偏暖色調，營造出溫馨且懷舊的情緒張力。",
+                    "低飽和度的處理讓畫面顯得高級且耐看，很有質感。"
+                ],
+                mid: [
+                    "色彩還原真實，但缺乏獨特的風格化調色。",
+                    "整體氛圍不錯，但部分色彩過於飽和，略顯搶眼。",
+                    "嘗試了風格化，但色調與主題的契合度還可以更好。",
+                    "黑白對比尚可，但灰階層次不夠豐富。"
+                ],
+                low: [
+                    "色彩雜亂，缺乏主色調，導致視覺焦點不明確。",
+                    "濾鏡使用過度，導致色彩斷層或失真嚴重。",
+                    "畫面整體灰濛濛，缺乏通透感與氛圍。",
+                    "色偏嚴重影響了觀感，建議校正白平衡。"
+                ]
+            },
+            theme: {
+                high: [
+                    "主題鮮明，故事性極強，能瞬間抓住觀者的情緒。",
+                    "捕捉到了決定性的瞬間，人物表情自然且充滿張力。",
+                    "畫面充滿了敘事感，彷彿在訴說一個安靜的故事。",
+                    "透過畫面傳達出的孤獨/歡樂感非常到位，感染力強。"
+                ],
+                mid: [
+                    "主題明確，但在情感傳遞上稍顯薄弱。",
+                    "拍攝意圖清晰，但呈現方式略顯直白，缺乏餘韻。",
+                    "有捕捉到動作，但表情或姿態稍顯僵硬。",
+                    "適合做為紀錄式影像，但在藝術表現上可再深入。"
+                ],
+                low: [
+                    "主題不明確，讓觀者難以理解想要表達的核心。",
+                    "拍攝時機稍縱即逝，未能捕捉到最有張力的瞬間。",
+                    "畫面內容空洞，缺乏視覺重心與故事性。",
+                    "像是一張隨手拍，缺乏攝影者的思考與觀點。"
+                ]
+            },
+            technique: {
+                high: [
+                    "焦點銳利，景深控制得宜，展現了極高的技術水準。",
+                    "快門速度掌握精準，動靜結合得非常完美。",
+                    "噪點控制優秀，畫質純淨，細節豐富。",
+                    "手持拍攝依然保持了極佳的穩定度，影像清晰。"
+                ],
+                mid: [
+                    "焦點基本準確，但在放大檢視下稍有微糊。",
+                    "景深稍淺，導致部分主體脫離了清晰範圍。",
+                    "ISO 略高導致有些許噪點，但不影響縮圖觀看。",
+                    "構圖平穩，但缺乏運鏡上的創意與技術突破。"
+                ],
+                low: [
+                    "焦點完全跑掉，主體模糊，影響了觀看體驗。",
+                    "手震明顯，導致畫面拖影，建議提升快門速度。",
+                    "畫質壓縮嚴重，細節塗抹感強，影響質感。",
+                    "鏡頭可能有些髒污，導致光暈或畫面霧化。"
+                ]
+            }
+        };
+
+        function getRandomComment(category, score) {
+            let level = 'mid';
+            if (score >= 18) level = 'high';
+            else if (score <= 14) level = 'low';
+            
+            const comments = commentDatabase[category][level];
+            // 隨機挑選 2 句不同的評語
+            let idx1 = Math.floor(Math.random() * comments.length);
+            let idx2 = idx1;
+            while(idx2 === idx1) {
+                idx2 = Math.floor(Math.random() * comments.length);
+            }
+            return [comments[idx1], comments[idx2]];
+        }
 
         function getChineseGrade(score) {
             if (score >= 95) return '甲上';
@@ -353,43 +501,54 @@
             return '丙';
         }
 
-        function generateDetailedComment(score) {
-            const grade = getChineseGrade(score);
-            const subScores = {
-                composition: Math.min(100, Math.floor(score * 0.9 + Math.random() * 20 - 10)), 
-                lighting: Math.min(100, Math.floor(score * 1.1 + Math.random() * 20 - 10)), 
-                color: Math.min(100, Math.floor(score * 1.0 + Math.random() * 15 - 7)) 
-            };
+        // ★★★ 核心：生成結構化分析報告 ★★★
+        function generateAnalysisReport(totalScore) {
+            // 1. 智慧分配分數 (讓總和 = totalScore，且每項 max 20)
+            let baseAvg = Math.floor(totalScore / 5);
+            let remainder = totalScore % 5;
+            let scores = [baseAvg, baseAvg, baseAvg, baseAvg, baseAvg];
+            for(let i=0; i<remainder; i++) scores[i]++;
 
-            const generateText = (subScore, criteria) => {
-                if (subScore >= 90) return `極為出色，AI 識別出 ${criteria} 比例接近完美，表現力強勁。`;
-                if (subScore >= 80) return `表現優良，符合 ${criteria} 的基本美學原則，畫面協調。`;
-                if (subScore >= 70) return `中規中矩，尚有可提升空間，建議在 ${criteria} 上更具創意。`;
-                return `有待加強，AI 偵測到 ${criteria} 存在明顯不足，需要重新調整。`;
-            };
+            // 加入隨機波動
+            for(let i=0; i<5; i++) {
+                let idxA = Math.floor(Math.random() * 5);
+                let idxB = Math.floor(Math.random() * 5);
+                if(idxA !== idxB && scores[idxA] < 20 && scores[idxB] > 0) {
+                    scores[idxA]++;
+                    scores[idxB]--;
+                }
+            }
 
-            const overallComment = getSimulatedOverallComment(grade);
-            
-            let htmlContent = `<p>${overallComment}</p>`;
-            htmlContent += `<div class="criteria-title">構圖 Composition (${subScores.composition} 分)</div><p style="margin-top:0">${generateText(subScores.composition, '構圖')}</p>`;
-            htmlContent += `<div class="criteria-title">光影 Lighting (${subScores.lighting} 分)</div><p style="margin-top:0">${generateText(subScores.lighting, '光影')}</p>`;
-            htmlContent += `<div class="criteria-title">色彩 Color Harmony (${subScores.color} 分)</div><p style="margin-top:0">${generateText(subScores.color, '色彩')}</p>`;
+            const categories = [
+                { key: 'composition', name: '構圖' },
+                { key: 'lighting', name: '光線' },
+                { key: 'tone', name: '色調與氛圍' },
+                { key: 'theme', name: '主題呈現' },
+                { key: 'technique', name: '影像技術' }
+            ];
 
-            return htmlContent;
-        }
+            let html = '';
+            let textSummary = '';
 
-        function getSimulatedOverallComment(grade) {
-             const overallComments = {
-                '甲上': ["AI 分析結果顯示，這是一張無可挑剔的頂級攝影作品，綜合得分達到甲上水平。"],
-                '甲': ["這張照片展現了極高的專業水準，在美學與技術層面均表現卓越，評為甲級。"],
-                '甲下': ["整體表現非常優異，各項指標均在水準之上，略微調整細節即可臻至完美。"],
-                '乙上': ["作品質量良好，但缺乏令人驚豔的突破，屬於基礎紮實的優等生。"],
-                '乙': ["畫面主題明確，但技術細節有待加強，AI 建議多從基本功著手。"],
-                '乙下': ["作品仍在探索階段，多項美學指標表現平平，尚需大量練習。"],
-                '丙': ["AI 建議重新檢視攝影的初衷，目前的技術表現未能達到基本要求。"]
-            };
-            const possibleComments = overallComments[grade] || overallComments['丙'];
-            return possibleComments[Math.floor(Math.random() * possibleComments.length)];
+            categories.forEach((cat, index) => {
+                const subScore = scores[index];
+                const comments = getRandomComment(cat.key, subScore);
+                
+                html += `
+                <div class="analysis-item">
+                    <div class="analysis-title">
+                        ${index + 1}. ${cat.name} <span class="score-tag">(${subScore}/20)</span>
+                    </div>
+                    <ul class="analysis-points">
+                        <li>${comments[0]}</li>
+                        <li>${comments[1]}</li>
+                    </ul>
+                </div>`;
+
+                if(index === 0 || index === 2) textSummary += `${comments[0]} `;
+            });
+
+            return { html, textSummary };
         }
 
         function startLoadingSequence(duration) {
@@ -416,7 +575,6 @@
             document.getElementById('uploadZone').style.display = 'none';
             document.getElementById('loadingZone').style.display = 'block';
             
-            // 重置特效
             removeEffects();
 
             const reader = new FileReader();
@@ -434,11 +592,16 @@
                 setTimeout(() => {
                     clearInterval(loadingInterval); 
                     const score = Math.floor(Math.random() * 71) + 30; 
-                    const aiResult = {
+                    
+                    // ★★★ 生成詳細報告 ★★★
+                    const report = generateAnalysisReport(score);
+                    
+                    const resultData = {
                         score: score,
-                        commentHtml: generateDetailedComment(score)
+                        reportHtml: report.html,
+                        summary: report.textSummary
                     };
-                    showResult(aiResult);
+                    showResult(resultData);
                 }, processingTime); 
             };
         }
@@ -460,61 +623,52 @@
 
             const score = data.score;
             const chineseGrade = getChineseGrade(score);
+            currentShareSummary = data.summary; // 儲存分享用摘要
 
             document.getElementById('scoreText').innerText = score;
             document.getElementById('chineseGradeDisplay').innerText = chineseGrade;
-            document.getElementById('commentText').innerHTML = data.commentHtml;
+            
+            // ★★★ 插入結構化報告 ★★★
+            document.getElementById('commentContent').innerHTML = data.reportHtml;
 
-            // 維持主題橘色
             document.getElementById('scoreText').style.color = 'var(--accent-color)';
             const deg = score * 3.6;
             document.getElementById('scoreCircleBg').style.background = 
                 `conic-gradient(var(--accent-color) ${deg}deg, #222 0deg)`;
 
-            // ★★★ 判斷並觸發特效 ★★★
-            if (score >= 90) {
-                triggerPerfectEffect();
-            } else if (score >= 80) {
-                triggerGoodEffect();
-            } else {
-                triggerBadEffect();
-            }
+            if (score >= 90) triggerPerfectEffect();
+            else if (score >= 80) triggerGoodEffect();
+            else triggerBadEffect();
         }
 
         // --- 特效函式區 ---
         
-        // ★★★ 新增：產生 4-8 秒隨機持續時間的函式 ★★★
         function getRandomDuration() {
-            return Math.floor(Math.random() * (8000 - 4000 + 1) + 4000); // 4000ms ~ 8000ms
+            return Math.floor(Math.random() * (8000 - 4000 + 1) + 4000); 
         }
 
         function triggerPerfectEffect() {
             const container = document.getElementById('appContainer');
             container.classList.add('effect-perfect');
-            // ★★★ 修改處 4：設定 CSS 動畫持續時間為隨機 ★★★
             const duration = getRandomDuration();
-            container.style.animation = `holy-glow 1.5s infinite alternate`; // 重新套用動畫設定
+            container.style.animation = `holy-glow 1.5s infinite alternate`; 
 
-            // 噴發拉炮 (持續隨機時間)
             var animationEnd = Date.now() + duration;
             var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
             var random = function(min, max) { return Math.random() * (max - min) + min; };
 
             var interval = setInterval(function() {
                 var timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) {
-                    return clearInterval(interval);
-                }
+                if (timeLeft <= 0) { return clearInterval(interval); }
                 var particleCount = 50 * (timeLeft / duration);
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.1, 0.3), y: Math.random() - 0.2 } }));
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.7, 0.9), y: Math.random() - 0.2 } }));
             }, 250);
 
-            // ★★★ 新增：隨機時間後移除特效 ★★★
             if (effectTimeout) clearTimeout(effectTimeout);
             effectTimeout = setTimeout(() => {
                 container.classList.remove('effect-perfect');
-                container.style.animation = 'none'; // 清除動畫
+                container.style.animation = 'none'; 
             }, duration);
         }
 
@@ -528,35 +682,29 @@
             void container.offsetWidth; 
             container.classList.add('effect-bad');
             
-            // ★★★ 修改處 5：設定 CSS 動畫持續時間為隨機 ★★★
             const duration = getRandomDuration();
-            container.style.animation = `shake 0.5s infinite`; // 讓它持續震動
+            container.style.animation = `shake 0.5s infinite`; 
 
-            // ★★★ 新增：隨機時間後移除特效 ★★★
             if (effectTimeout) clearTimeout(effectTimeout);
             effectTimeout = setTimeout(() => {
                 container.classList.remove('effect-bad');
-                container.style.animation = 'none'; // 清除動畫
+                container.style.animation = 'none'; 
             }, duration);
         }
 
         function removeEffects() {
             const container = document.getElementById('appContainer');
             container.classList.remove('effect-perfect', 'effect-good', 'effect-bad');
-            container.style.animation = 'none'; // 清除所有 JS 設定的動畫
-            if (effectTimeout) clearTimeout(effectTimeout); // 清除計時器
+            container.style.animation = 'none'; 
+            if (effectTimeout) clearTimeout(effectTimeout); 
         }
-
-        // ------------------
 
         async function shareResult() {
             const scoreText = document.getElementById('scoreText').innerText;
             const gradeText = document.getElementById('chineseGradeDisplay').innerText;
-            const commentBoxContent = document.getElementById('commentText').innerText; 
-            const overallComment = commentBoxContent.split('\n')[0].trim();
-
+            
             const shareTitle = `我的照片剛被 AI 評分了！😱 竟然拿到了 **${scoreText} 分 (${gradeText})**！`;
-            const shareCommentSummary = `🤖 AI 報告總結：${overallComment}`;
+            const shareCommentSummary = `🤖 AI 專業短評：${currentShareSummary}...`;
             const shareLink = `\n\n👉 點擊連結來評分：${window.location.href}`;
             
             const fullShareContent = `${shareTitle}\n${shareCommentSummary}${shareLink}`;
@@ -571,7 +719,7 @@
             document.getElementById('loadingZone').style.display = 'none';
             document.getElementById('uploadZone').style.display = 'block';
             document.getElementById('fileInput').value = '';
-            removeEffects(); // 清除特效
+            removeEffects(); 
             if (loadingInterval) clearInterval(loadingInterval); 
         }
 
