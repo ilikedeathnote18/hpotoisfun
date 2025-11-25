@@ -52,6 +52,8 @@
             position: relative;
             border: 2px solid #3d3d3d; /* 稍微加粗邊框以便顯示特效顏色 */
             transition: all 0.3s ease;
+            /* 確保容器不會壓到下面的浮水印 */
+            margin-bottom: 1rem; 
         }
 
         /* ----------- ✨ 特效動畫區 (新增) ----------- */
@@ -277,7 +279,7 @@
 
             <div class="btn-group">
                 <button class="btn btn-share" onclick="shareResult()">🚀 分享給朋友</button> 
-                <button class="btn btn-retry" onclick="resetApp()">↺ 在上訴一張</button>
+                <button class="btn btn-retry" onclick="resetApp()">↺ 再上訴一張</button>
             </div>
             
             <div class="screenshot-mask"></div>
