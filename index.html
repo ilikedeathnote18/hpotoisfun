@@ -3,22 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>模擬攝影評分</title>
+    <title>📸 AI評分你的照片~!!!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
-        /* ------ CSS 美化設定 (與上次相同，移除 API 相關樣式) ------ */
+        /* ------ CSS 美化設定 (大幅更新) ------ */
         :root {
-            --primary: #4f46e5;     /* 主色調：靛藍 */
-            --bg: #f8fafc;          /* 背景色 */
-            --surface: #ffffff;     /* 卡片背景 */
-            --text: #1e293b;        /* 文字色 */
-            --grade-bg: #eef2ff;    /* 中文分數背景 */
-            --grade-text: #3730a3;  /* 中文分數文字 */
+            --primary: #4f46e5;         /* 主色調：靛藍 */
+            --primary-light: #eef2ff;   /* 主色淡色 */
+            --bg: #f0f4f8;              /* 背景色 */
+            --card-bg: #ffffff;         /* 卡片背景 */
+            --text-dark: #1f2937;       /* 深色文字 */
+            --text-medium: #4b5563;     /* 中等文字 */
+            --text-light: #9ca3af;      /* 淺色文字 */
+            --shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --border-color: #e2e8f0;
+
+            /* 動態分數顏色 (會被 JS 覆寫) */
+            --score-color-high: #22c55e; /* 高分綠 */
+            --score-color-mid: #f59e0b;  /* 中分黃 */
+            --score-color-low: #ef4444;  /* 低分紅 */
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Noto Sans TC', 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg);
-            color: var(--text);
+            color: var(--text-dark);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -26,129 +36,301 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
+            line-height: 1.6;
         }
 
         .app-container {
-            background: var(--surface);
+            background: var(--card-bg);
             width: 100%;
-            max-width: 420px;
-            padding: 2rem;
-            border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            max-width: 450px; /* 稍微放大容器 */
+            padding: 2.5rem;
+            border-radius: 28px;
+            box-shadow: var(--shadow);
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease-in-out;
+            transform-style: preserve-3d; /* 啟用 3D 變換 */
         }
 
-        h1 { margin-top: 0; font-size: 1.5rem; color: #0f172a; }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 2.5rem;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
 
-        /* 1. 上傳區塊 */
+        /* 1. 上傳區塊 (強化視覺與互動) */
         .upload-zone {
-            border: 2px dashed #cbd5e1;
-            border-radius: 16px;
-            padding: 3rem 1rem;
+            border: 3px dashed var(--border-color);
+            border-radius: 20px;
+            padding: 3.5rem 1.5rem;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.3s ease;
             background: #fff;
+            position: relative;
+            overflow: hidden;
         }
         .upload-zone:hover {
             border-color: var(--primary);
-            background: #f1f5f9;
+            background: var(--primary-light);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(var(--primary), 0.15);
         }
-        .upload-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+        .upload-zone:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .upload-icon {
+            font-size: 4rem; /* 放大圖示 */
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: block;
+            animation: bounceIn 0.8s ease-out; /* 新增動畫 */
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+        .upload-subtext {
+            font-size: 0.9rem;
+            color: var(--text-medium);
+        }
         #fileInput { display: none; }
 
-        /* 2. 載入動畫 */
+        /* 2. 載入動畫 (強化視覺) */
         .loading-zone {
             display: none;
-            padding: 2rem 0;
+            padding: 3rem 0;
+            animation: fadeIn 0.5s ease-out;
         }
         .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid #e2e8f0;
+            width: 50px; height: 50px; /* 放大 */
+            border: 5px solid #e2e8f0;
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
+            margin: 0 auto 2rem;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-medium);
+            margin-bottom: 0.5rem;
+        }
+        .loading-subtext {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
 
-        /* 3. 結果展示區 (照片+分數) */
+        /* 3. 結果展示區 (大幅優化) */
         .result-zone {
             display: none;
-            animation: fadeIn 0.5s ease;
+            animation: slideUpIn 0.6s ease-out forwards;
+            position: relative; /* 用於截圖 */
+            padding-bottom: 0; /* 讓內容更緊湊 */
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUpIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
 
         /* 照片容器 */
         .image-wrapper {
             width: 100%;
-            margin-bottom: -40px;
+            margin-bottom: -40px; /* 讓分數圓圈疊在照片上 */
             position: relative;
             z-index: 1;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15); /* 強化陰影 */
+            border-radius: 16px;
         }
         .preview-img {
             width: 100%;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 16px; /* 圓角與容器一致 */
             display: block;
+            object-fit: cover; /* 確保圖片不變形 */
+            max-height: 250px; /* 限制高度 */
         }
 
         /* 分數圓圈 + 中文分數容器 */
-        .score-wrapper {
+        .score-display-group {
             position: relative;
             z-index: 2;
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 1.8rem;
         }
         .score-circle {
-            width: 100px; height: 100px; border-radius: 50%;
+            width: 110px; height: 110px; /* 放大分數圈 */
+            border-radius: 50%;
             background: conic-gradient(var(--primary) 0%, #e2e8f0 0%);
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); background-color: white;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.25); /* 更強陰影 */
+            background-color: white; /* 確保背景不透明 */
+            border: 4px solid white; /* 讓分數圈有立體感 */
         }
-        .score-val { font-size: 2.2rem; font-weight: 800; color: var(--primary); line-height: 1; }
+        .score-inner {
+            width: 90px; height: 90px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .score-val {
+            font-size: 2.8rem; /* 放大分數數字 */
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+        }
+        .score-label {
+            font-size: 0.85rem;
+            color: var(--text-medium);
+            margin-top: 5px;
+            letter-spacing: 0.5px;
+        }
         
-        /* 中文分數樣式 */
+        /* 中文分數樣式 (字體最大) */
         .grade-display {
-            margin-top: 15px; padding: 8px 18px;
-            background: var(--grade-bg); color: var(--grade-text);
-            border-radius: 20px; font-size: 1.2rem;
-            font-weight: 700; letter-spacing: 1px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            margin-top: 20px; /* 拉開與數值分數的距離 */
+            padding: 10px 25px; /* 放大 padding */
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 30px; /* 更圓潤 */
+            font-size: 1.8rem; /* **大幅放大** */
+            font-weight: 700;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            animation: popIn 0.5s ease-out 0.3s backwards; /* 延遲彈入 */
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
         }
 
         /* 評語 */
         .comment-box {
-            background: #f1f5f9; padding: 1rem; border-radius: 12px;
-            margin-bottom: 1.5rem; text-align: left; font-size: 0.95rem;
-            line-height: 1.6; color: #334155;
+            background: #f1f5f9;
+            padding: 1.5rem;
+            border-radius: 18px;
+            margin-bottom: 2rem; /* 增加與按鈕的距離 */
+            text-align: left;
+            font-size: 1rem; /* 稍微放大 */
+            line-height: 1.7;
+            color: var(--text-dark);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .comment-box strong {
+            color: var(--primary);
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.5rem;
         }
 
         /* 按鈕群 */
-        .btn-group { display: flex; gap: 10px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .btn-share { background: var(--primary); color: white; }
-        .btn-retry { background: #e2e8f0; color: #475569; }
-        .btn:active { transform: scale(0.96); }
+        .btn-group {
+            display: flex;
+            gap: 12px; /* 增加間距 */
+            margin-top: 2rem;
+        }
+        .btn {
+            flex: 1;
+            padding: 14px 20px; /* 放大按鈕 */
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05rem; /* 放大字體 */
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .btn-share {
+            background: var(--primary);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-share::after { /* 按鈕點擊波紋效果 */
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.4s ease-out;
+            opacity: 0;
+            top: 50%;
+            left: 50%;
+        }
+        .btn-share:active::after {
+            transform: scale(2);
+            opacity: 1;
+        }
+
+        .btn-retry {
+            background: var(--border-color);
+            color: var(--text-dark);
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+        .btn-share:hover { background: #3730a3; } /* 點擊時顏色更深 */
+        .btn-retry:hover { background: #cbd5e1; }
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* 遮罩，用於截圖時隱藏按鈕 */
+        .screenshot-mask {
+            position: absolute;
+            bottom: -2rem; /* 稍微超出容器，確保遮住按鈕 */
+            left: -2.5rem; /* 擴大到容器 padding 之外 */
+            right: -2.5rem; /* 擴大到容器 padding 之外 */
+            height: 8rem; /* 根據按鈕高度和間距調整 */
+            background-color: var(--card-bg); /* 與容器背景色一致 */
+            z-index: 100; /* 確保遮蓋住按鈕 */
+            display: none; /* 預設隱藏 */
+            border-radius: 0 0 28px 28px; /* 底部圓角 */
+        }
+        /* 當進行截圖時顯示遮罩 */
+        .app-container.screenshot-mode .screenshot-mask {
+            display: block;
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <h1>📸 模擬攝影評分</h1>
+    <div class="app-container" id="appContainer">
+        <h1>📸 照片美學評分</h1>
 
         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-            <span class="upload-icon">☁️</span>
-            <p><strong>點擊上傳照片</strong></p>
-            <p style="font-size:0.8rem; color:#94a3b8">結果為模擬亂數</p>
+            <span class="upload-icon">⬆️</span>
+            <p class="upload-text">點擊或拖曳上傳照片</p>
+            <p class="upload-subtext">AI 將模擬評鑑您的攝影作品</p>
             <input type="file" id="fileInput" accept="image/*" onchange="processImage(event)">
         </div>
 
         <div class="loading-zone" id="loadingZone">
             <div class="spinner"></div>
-            <p>正在計算分數...</p>
+            <p class="loading-text">正在分析照片美學與構圖...</p>
+            <p class="loading-subtext">這可能需要幾秒鐘，請稍候</p>
         </div>
 
         <div class="result-zone" id="resultZone">
@@ -156,7 +338,7 @@
                 <img id="displayImage" class="preview-img" src="" alt="User Photo">
             </div>
 
-            <div class="score-wrapper">
+            <div class="score-display-group">
                 <div class="score-circle" id="scoreCircleBg">
                     <div class="score-inner">
                         <span class="score-val" id="scoreText">0</span>
@@ -168,21 +350,22 @@
             </div>
 
             <div class="comment-box">
-                <strong style="color:var(--primary)">🧠 模擬評語：</strong><br>
+                <strong>🧠 模擬 AI 評語：</strong>
                 <span id="commentText">評語載入中...</span>
             </div>
 
             <div class="btn-group">
-                <button class="btn btn-share" onclick="shareResult()">📤 分享分數</button>
-                <button class="btn btn-retry" onclick="resetApp()">🔄 上訴 (重測)</button>
+                <button class="btn btn-share" onclick="shareResult()">🚀 分享評分</button>
+                <button class="btn btn-retry" onclick="resetApp()">♻️ 再次評分</button>
             </div>
+            <div class="screenshot-mask"></div>
         </div>
     </div>
 
     <script>
         // ------ JavaScript 邏輯 ------
 
-        // 1. 中文分數轉換邏輯 (保留)
+        // 1. 中文分數轉換邏輯
         function getChineseGrade(score) {
             if (score >= 95) return '甲上';
             if (score >= 90) return '甲';
@@ -193,17 +376,59 @@
             return '丙';
         }
 
-        // 2. 模擬評語 (新增)
-        function getSimulatedComment(score) {
-            if (score >= 95) return "完美的光線掌控！這張照片簡直是藝術品，請收下甲上的最高評價！";
-            if (score >= 90) return "構圖與色彩協調完美，已經具備專業級水準。";
-            if (score >= 80) return "視覺效果良好，但細節處理上還有提升空間。";
-            if (score >= 70) return "意境不錯，但曝光或對焦略有不足，下次會更好。";
-            return "嗯... 藝術是很主觀的，我們下次再試試別的角度？";
+        // 2. 模擬評語 (多組變化)
+        const comments = {
+            '甲上': [
+                "簡直是藝術品！光線、構圖、意境無可挑剔，完美駕馭攝影的精髓！",
+                "這不是照片，這是視覺饗宴！超越期待的傑作，每一次細看都是享受。",
+                "構圖如詩，光影如畫，瞬間捕捉永恆。甲上，當之無愧！",
+                "AI 都驚嘆的完美作品，請接受最崇高的敬意。"
+            ],
+            '甲': [
+                "非常精采的攝影作品，構圖與氛圍掌握得爐火純青，深具美感！",
+                "細節豐富，色彩飽和，視覺衝擊力十足。值得細細品味。",
+                "平衡感極佳，展現了攝影師對美的獨到眼光，非常棒！",
+                "幾乎是滿分作品，只差一點點天馬行空的靈感就能超越。"
+            ],
+            '甲下': [
+                "表現力強，已是優秀之作。再多一點點巧思就能更上一層樓！",
+                "畫面感很棒，光影運用得宜，略有小瑕疵但不影響整體質感。",
+                "看得出用心，風格獨特。繼續加油，潛力無限！",
+                "美學觀念清晰，只是少了那麼一點點令人驚豔的瞬間。"
+            ],
+            '乙上': [
+                "畫面整潔，主題明確。如果能在光線或角度上大膽嘗試，會更好。",
+                "整體感覺舒適，但缺乏令人印象深刻的亮點。",
+                "基本功紮實，但缺乏情感深度或創意思考，建議多觀察。",
+                "拍得還不錯啦，至少我看得懂這是什麼。"
+            ],
+            '乙': [
+                "這張照片還行，但有些元素分散了注意力，構圖可以再精簡些。",
+                "光線或色彩處理略顯平淡，未能充分發揮主題潛力。",
+                "有待提升，多觀察優秀作品會很有幫助。",
+                "中規中矩，沒有犯大錯，但也沒留下深刻印象。"
+            ],
+            '乙下': [
+                "畫面有些雜亂，主題不夠突出。建議先學習基本的構圖法則。",
+                "曝光或對焦可能存在問題，細節呈現不足。",
+                "創意有，但執行力有待加強。請多加練習。",
+                "感覺像是隨手一拍？嗯... 至少顏色是彩色的。"
+            ],
+            '丙': [
+                "這... 藝術是主觀的，我們還是換張照片來看看吧？",
+                "看來這張照片與美學評分系統緣分尚淺，建議重新審視主題與光線。",
+                "嗯，嘗試是好的，但建議從零開始學習攝影基礎，加油！",
+                "AI 也詞窮了，我只能說這是一張照片。"
+            ]
+        };
+
+        function getSimulatedComment(grade) {
+            const possibleComments = comments[grade] || comments['丙']; // 確保有預設值
+            return possibleComments[Math.floor(Math.random() * possibleComments.length)];
         }
 
 
-        // 3. 處理圖片與模擬評分 (取代 API 呼叫)
+        // 3. 處理圖片與模擬評分
         async function processImage(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -217,23 +442,25 @@
             reader.onload = function(e) {
                 document.getElementById('displayImage').src = e.target.result;
 
-                // 模擬處理時間 (2秒)
+                // 模擬處理時間 (2-4秒)
+                const processingTime = Math.floor(Math.random() * 2000) + 2000; // 2000ms ~ 4000ms
                 setTimeout(() => {
-                    // --- 核心：產生隨機分數 (0-100) ---
-                    const score = Math.floor(Math.random() * 101); 
+                    // 隨機產生分數 (30-100)
+                    const score = Math.floor(Math.random() * 71) + 30; // 讓分數分佈在 30-100 之間更真實
+                    const chineseGrade = getChineseGrade(score);
                     
                     const aiResult = {
                         score: score,
-                        comment: getSimulatedComment(score)
+                        comment: getSimulatedComment(chineseGrade) // 根據中文分數給評語
                     };
 
                     showResult(aiResult);
-                }, 2000); 
+                }, processingTime); 
             };
             reader.readAsDataURL(file);
         }
         
-        // 4. 顯示結果動畫 (與上次相同，只移除 API 相關設定)
+        // 4. 顯示結果動畫
         function showResult(data) {
             document.getElementById('loadingZone').style.display = 'none';
             document.getElementById('resultZone').style.display = 'block';
@@ -245,13 +472,14 @@
             document.getElementById('chineseGradeDisplay').innerText = chineseGrade;
             document.getElementById('commentText').innerText = data.comment;
 
-            // 圓環顏色與樣式
-            let color = '#ef4444'; // 丙
-            if (score >= 70) color = '#f59e0b'; // 乙系列
-            if (score >= 85) color = '#4f46e5'; // 甲系列
+            // 圓環顏色與樣式 (根據分數變化)
+            let color;
+            if (score >= 85) color = 'var(--score-color-high)'; // 高分綠
+            else if (score >= 70) color = 'var(--score-color-mid)'; // 中分黃
+            else color = 'var(--score-color-low)'; // 低分紅
             
             document.getElementById('scoreText').style.color = color;
-            document.getElementById('chineseGradeDisplay').style.background = color + '20';
+            document.getElementById('chineseGradeDisplay').style.background = `color-mix(in srgb, ${color} 20%, white)`; // 用 CSS color-mix 產生淡色背景
             document.getElementById('chineseGradeDisplay').style.color = color;
             
             const deg = score * 3.6;
@@ -259,33 +487,97 @@
                 `conic-gradient(${color} ${deg}deg, #e2e8f0 0deg)`;
         }
 
-        // 5. 分享功能 (與上次相同)
+        // 5. 分享功能 (使用 html2canvas 截圖)
         async function shareResult() {
-            const score = document.getElementById('scoreText').innerText;
-            const grade = document.getElementById('chineseGradeDisplay').innerText;
-            const comment = document.getElementById('commentText').innerText;
-            
-            const shareData = {
-                title: '模擬攝影評分結果',
-                text: `我的照片獲得 ${score} 分 (${grade})！評語：「${comment}」`,
-                url: window.location.href
-            };
+            const appContainer = document.getElementById('appContainer');
+            const shareButton = document.querySelector('.btn-share');
+            const retryButton = document.querySelector('.btn-retry');
+            const screenshotMask = document.querySelector('.screenshot-mask');
 
-            if (navigator.share) {
-                try { await navigator.share(shareData); } catch (e) {}
-            } else {
-                navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
-                alert('結果已複製！快去貼給朋友看！');
-            }
+            // 1. 隱藏按鈕，顯示遮罩 (為了截圖時畫面乾淨)
+            retryButton.style.opacity = '0';
+            shareButton.style.opacity = '0';
+            appContainer.classList.add('screenshot-mode'); // 啟用遮罩
+
+            // 確保元素隱藏完畢
+            await new Promise(r => setTimeout(r, 100)); 
+            
+            // 2. 使用 html2canvas 截圖
+            html2canvas(appContainer, {
+                useCORS: true, // 確保圖片可以被正確截圖 (如果圖片是外部連結需要)
+                scale: 2, // 提高解析度
+                logging: false, // 關閉 console log
+                backgroundColor: null, // 讓背景透明，與 body 背景一致
+            }).then(canvas => {
+                // 3. 截圖完成，恢復按鈕
+                retryButton.style.opacity = '1';
+                shareButton.style.opacity = '1';
+                appContainer.classList.remove('screenshot-mode'); // 禁用遮罩
+
+                // 4. 轉換為圖片並提供下載/分享
+                const image = canvas.toDataURL("image/png");
+                
+                // 嘗試使用原生分享 API (通常在手機上)
+                if (navigator.share) {
+                    canvas.toBlob(function(blob) {
+                        const file = new File([blob], 'AI_Photo_Rating.png', { type: 'image/png' });
+                        navigator.share({
+                            files: [file],
+                            title: '我的照片 AI 評分結果！',
+                            text: `我的照片獲得 ${document.getElementById('scoreText').innerText} 分 (${document.getElementById('chineseGradeDisplay').innerText})！快來試試：${window.location.href}`
+                        }).catch(error => console.log('分享失敗', error));
+                    }, 'image/png');
+                } else {
+                    // 如果不支援原生分享 (通常在電腦上)，則下載圖片
+                    const link = document.createElement('a');
+                    link.download = 'AI_Photo_Rating.png';
+                    link.href = image;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    alert('評分結果圖片已下載！');
+                }
+            }).catch(error => {
+                console.error("截圖失敗:", error);
+                // 截圖失敗也要恢復按鈕
+                retryButton.style.opacity = '1';
+                shareButton.style.opacity = '1';
+                appContainer.classList.remove('screenshot-mode');
+                alert('截圖失敗，請稍後再試。');
+            });
         }
 
-        // 6. 重置 (上訴)
+        // 6. 重置 (再次評分)
         function resetApp() {
             document.getElementById('resultZone').style.display = 'none';
             document.getElementById('loadingZone').style.display = 'none';
             document.getElementById('uploadZone').style.display = 'block';
-            document.getElementById('fileInput').value = '';
+            document.getElementById('fileInput').value = ''; // 清空已選檔案
         }
+
+        // 拖曳上傳功能 (為美化上傳畫面增加)
+        const uploadZone = document.getElementById('uploadZone');
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = var(--primary);
+            uploadZone.style.backgroundColor = var(--primary-light);
+        });
+        uploadZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = var(--border-color);
+            uploadZone.style.backgroundColor = '#fff';
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = var(--border-color);
+            uploadZone.style.backgroundColor = '#fff';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('fileInput').files = files;
+                processImage({ target: { files: files } });
+            }
+        });
+
     </script>
 </body>
 </html>
