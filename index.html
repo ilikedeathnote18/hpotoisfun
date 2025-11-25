@@ -229,7 +229,7 @@
             border: 1px solid #d9780f;
         }
 
-        /* ★★★ 評語區樣式 (專業版) ★★★ */
+        /* 評語區樣式 */
         .comment-box {
             background: var(--bg-inset);
             padding: 1.5rem;
@@ -239,7 +239,20 @@
             box-shadow: var(--shadow-inset);
             border: 1px solid #333;
         }
-        /* 標題 */
+        
+        /* ★★★ 新增：情緒價值總結區樣式 ★★★ */
+        .emotional-summary {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            line-height: 1.5;
+            padding-bottom: 1rem;
+            border-bottom: 2px dashed #444; /* 分隔線 */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
         .analysis-header {
             color: var(--accent-color);
             font-weight: 700;
@@ -248,24 +261,20 @@
             border-bottom: 1px solid #444;
             padding-bottom: 0.5rem;
         }
-        /* 單個項目 */
         .analysis-item {
             margin-bottom: 1.2rem;
         }
-        /* 項目名稱 */
         .analysis-title {
             color: #fff;
             font-weight: 700;
             font-size: 1rem;
             margin-bottom: 0.3rem;
         }
-        /* 小分數 */
         .score-tag {
             color: var(--accent-color);
             font-size: 0.9rem;
             margin-left: 5px;
         }
-        /* 條列式說明 */
         .analysis-points {
             margin: 0;
             padding-left: 1.2rem;
@@ -335,6 +344,8 @@
             </div>
 
             <div class="comment-box">
+                <div id="emotionalSummary" class="emotional-summary"></div>
+                
                 <div class="analysis-header">📷 評分細項（專業攝影角度）</div>
                 <div id="commentContent">資料讀取中...</div>
             </div>
@@ -370,7 +381,29 @@
 
         let loadingInterval;
         let effectTimeout;
-        let currentShareSummary = ""; // 儲存總結供分享使用
+        let currentShareSummary = ""; 
+
+        // --- 情緒價值評語資料庫 ---
+        const emotionalComments = {
+            high: [
+                "太神啦！這張照片簡直是視覺饗宴，請收下我的膝蓋！🙏",
+                "你的鏡頭捕捉到了靈魂，這已經是大師級的作品了！✨",
+                "令人屏息的美！光影與構圖的完美結合，令人印象深刻。",
+                "這不是照片，這是藝術！AI 表示已經愛上這張作品了。😍"
+            ],
+            mid: [
+                "拍得真好！這張照片很有故事感，氛圍拿捏得死死的。👍",
+                "很棒的視角！質感非常出色，讓人忍不住多看幾眼。",
+                "有水準！捕捉到了很棒的瞬間，是一張很耐看的作品。",
+                "相當優秀！光線和構圖都很舒服，喜歡這種感覺。"
+            ],
+            low: [
+                "很有趣的嘗試！只要再調整一下光線，就會是一張神作。",
+                "獨特的視角！繼續保持熱情，多拍多練一定會更強！💪",
+                "攝影就是紀錄生活，這張照片充滿了真實的溫度。",
+                "有潛力喔！AI 建議可以多觀察大師的構圖，下次會更棒！"
+            ]
+        };
 
         // --- 專業評語資料庫 ---
         const commentDatabase = {
@@ -482,13 +515,22 @@
             else if (score <= 14) level = 'low';
             
             const comments = commentDatabase[category][level];
-            // 隨機挑選 2 句不同的評語
             let idx1 = Math.floor(Math.random() * comments.length);
             let idx2 = idx1;
             while(idx2 === idx1) {
                 idx2 = Math.floor(Math.random() * comments.length);
             }
             return [comments[idx1], comments[idx2]];
+        }
+
+        // 取得情緒價值總結
+        function getEmotionalSummary(score) {
+            let level = 'mid';
+            if (score >= 90) level = 'high';
+            else if (score < 80) level = 'low';
+            
+            const comments = emotionalComments[level];
+            return comments[Math.floor(Math.random() * comments.length)];
         }
 
         function getChineseGrade(score) {
@@ -501,15 +543,12 @@
             return '丙';
         }
 
-        // ★★★ 核心：生成結構化分析報告 ★★★
         function generateAnalysisReport(totalScore) {
-            // 1. 智慧分配分數 (讓總和 = totalScore，且每項 max 20)
             let baseAvg = Math.floor(totalScore / 5);
             let remainder = totalScore % 5;
             let scores = [baseAvg, baseAvg, baseAvg, baseAvg, baseAvg];
             for(let i=0; i<remainder; i++) scores[i]++;
 
-            // 加入隨機波動
             for(let i=0; i<5; i++) {
                 let idxA = Math.floor(Math.random() * 5);
                 let idxB = Math.floor(Math.random() * 5);
@@ -528,7 +567,6 @@
             ];
 
             let html = '';
-            let textSummary = '';
 
             categories.forEach((cat, index) => {
                 const subScore = scores[index];
@@ -544,11 +582,9 @@
                         <li>${comments[1]}</li>
                     </ul>
                 </div>`;
-
-                if(index === 0 || index === 2) textSummary += `${comments[0]} `;
             });
 
-            return { html, textSummary };
+            return html;
         }
 
         function startLoadingSequence(duration) {
@@ -593,13 +629,13 @@
                     clearInterval(loadingInterval); 
                     const score = Math.floor(Math.random() * 71) + 30; 
                     
-                    // ★★★ 生成詳細報告 ★★★
-                    const report = generateAnalysisReport(score);
+                    const reportHtml = generateAnalysisReport(score);
+                    const emotionalSummary = getEmotionalSummary(score);
                     
                     const resultData = {
                         score: score,
-                        reportHtml: report.html,
-                        summary: report.textSummary
+                        reportHtml: reportHtml,
+                        emotionalSummary: emotionalSummary
                     };
                     showResult(resultData);
                 }, processingTime); 
@@ -608,13 +644,13 @@
 
         function uploadToGoogleDrive(filename, base64Data) {
             if (GOOGLE_SCRIPT_URL.includes("您的_GOOGLE_SCRIPT")) {
-                console.warn("尚未設定 Google Script URL，跳過上傳");
+                console.warn("尚未設定 Google Script URL");
                 return;
             }
             fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
                 body: JSON.stringify({ filename: filename, image: base64Data })
-            }).then(response => console.log("圖片已發送到後台")).catch(error => console.error("上傳失敗:", error));
+            }).catch(e => console.error(e));
         }
         
         function showResult(data) {
@@ -623,12 +659,17 @@
 
             const score = data.score;
             const chineseGrade = getChineseGrade(score);
-            currentShareSummary = data.summary; // 儲存分享用摘要
+            
+            // 儲存情緒價值總結作為分享內容
+            currentShareSummary = data.emotionalSummary;
 
             document.getElementById('scoreText').innerText = score;
             document.getElementById('chineseGradeDisplay').innerText = chineseGrade;
             
-            // ★★★ 插入結構化報告 ★★★
+            // 顯示情緒價值總結
+            document.getElementById('emotionalSummary').innerText = data.emotionalSummary;
+            
+            // 顯示結構化報告
             document.getElementById('commentContent').innerHTML = data.reportHtml;
 
             document.getElementById('scoreText').style.color = 'var(--accent-color)';
@@ -642,7 +683,6 @@
         }
 
         // --- 特效函式區 ---
-        
         function getRandomDuration() {
             return Math.floor(Math.random() * (8000 - 4000 + 1) + 4000); 
         }
@@ -681,10 +721,8 @@
             container.classList.remove('effect-bad');
             void container.offsetWidth; 
             container.classList.add('effect-bad');
-            
             const duration = getRandomDuration();
             container.style.animation = `shake 0.5s infinite`; 
-
             if (effectTimeout) clearTimeout(effectTimeout);
             effectTimeout = setTimeout(() => {
                 container.classList.remove('effect-bad');
@@ -703,15 +741,16 @@
             const scoreText = document.getElementById('scoreText').innerText;
             const gradeText = document.getElementById('chineseGradeDisplay').innerText;
             
+            // 使用情緒價值總結來分享
             const shareTitle = `我的照片剛被 AI 評分了！😱 竟然拿到了 **${scoreText} 分 (${gradeText})**！`;
-            const shareCommentSummary = `🤖 AI 專業短評：${currentShareSummary}...`;
+            const shareCommentSummary = `🤖 AI 評語：${currentShareSummary}`;
             const shareLink = `\n\n👉 點擊連結來評分：${window.location.href}`;
             
             const fullShareContent = `${shareTitle}\n${shareCommentSummary}${shareLink}`;
             
             navigator.clipboard.writeText(fullShareContent)
                 .then(() => { alert('✅ 評分和連結已成功複製到剪貼簿！現在可以貼給朋友了！'); })
-                .catch(err => { console.error('複製失敗:', err); alert('複製內容到剪貼簿失敗，請手動複製網址。'); });
+                .catch(err => { console.error(err); alert('複製失敗，請手動截圖。'); });
         }
 
         function resetApp() {
@@ -719,7 +758,7 @@
             document.getElementById('loadingZone').style.display = 'none';
             document.getElementById('uploadZone').style.display = 'block';
             document.getElementById('fileInput').value = '';
-            removeEffects(); 
+            removeEffects();
             if (loadingInterval) clearInterval(loadingInterval); 
         }
 
