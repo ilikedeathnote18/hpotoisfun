@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📸 AI 照片美學評分 (模擬分析)</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght+300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
-        /* ------ CSS 美化設定 (與上次相同，增加載入畫面特效) ------ */
+        /* ... CSS 樣式與上次相同 ... */
         :root {
-            --primary: #4f46e5;         /* 主色調：靛藍 */
+            --primary: #4f46e5;         
             --primary-light: #eef2ff;   
             --bg: #f0f4f8;              
             --card-bg: #ffffff;         
@@ -117,7 +117,7 @@
             font-size: 1.1rem;
             font-weight: 500;
             color: var(--text-dark);
-            height: 1.8rem; /* 固定高度，防止文字切換時畫面跳動 */
+            height: 1.8rem;
             overflow: hidden;
             white-space: nowrap;
             display: flex;
@@ -222,7 +222,7 @@
     <div class="app-container" id="appContainer">
         <h1>📸 照片美學評分</h1>
 
-        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-zone" id="uploadZone" onclick="triggerFileInput()">
             <span class="upload-icon">⬆️</span>
             <p class="upload-text">點擊或拖曳上傳照片</p>
             <p class="upload-subtext">AI 將模擬評鑑您的攝影作品</p>
@@ -266,9 +266,14 @@
     </div>
 
     <script>
-        // ------ JavaScript 邏輯 (增強模擬效果) ------
+        // ------ JavaScript 邏輯 ------
 
-        // 模擬 AI 分析步驟的專業訊息
+        // 新增的觸發函數：解決點擊無反應問題
+        function triggerFileInput() {
+            document.getElementById('fileInput').click();
+        }
+
+        // 模擬 AI 分析步驟的專業訊息 (略)
         const loadingMessages = [
             "正在讀取高解析度圖像數據...",
             "執行 VGG16 結構化特征提取...",
@@ -280,7 +285,7 @@
             "生成結構化評語報告..."
         ];
 
-        let loadingInterval; // 用於控制訊息切換的計時器
+        let loadingInterval;
 
         // 1. 中文分數轉換邏輯 (保留)
         function getChineseGrade(score) {
@@ -293,13 +298,13 @@
             return '丙';
         }
 
-        // 2. 結構化評語生成 (新增：讓評分看起來有依據)
+        // 2. 結構化評語生成 (保留)
         function generateDetailedComment(score) {
             const grade = getChineseGrade(score);
             const subScores = {
-                composition: Math.min(100, Math.floor(score * 0.9 + Math.random() * 20 - 10)), // 構圖
-                lighting: Math.min(100, Math.floor(score * 1.1 + Math.random() * 20 - 10)), // 光影
-                color: Math.min(100, Math.floor(score * 1.0 + Math.random() * 15 - 7)) // 色彩
+                composition: Math.min(100, Math.floor(score * 0.9 + Math.random() * 20 - 10)),
+                lighting: Math.min(100, Math.floor(score * 1.1 + Math.random() * 20 - 10)),
+                color: Math.min(100, Math.floor(score * 1.0 + Math.random() * 15 - 7))
             };
 
             const generateText = (subScore, criteria) => {
@@ -319,7 +324,7 @@
             return htmlContent;
         }
         
-        // 3. 模擬總結評語 (簡化，只做總結)
+        // 3. 模擬總結評語 (保留)
         function getSimulatedOverallComment(grade) {
              const overallComments = {
                 '甲上': ["AI 分析結果顯示，這是一張無可挑剔的頂級攝影作品，綜合得分達到甲上水平。"],
@@ -335,50 +340,49 @@
         }
 
 
-        // 4. 開始 AI 階段式分析 (模擬載入過程)
+        // 4. 開始 AI 階段式分析 (模擬載入過程) (保留)
         function startLoadingSequence(duration) {
             const loadingTextElement = document.getElementById('loadingText');
             let index = 0;
-            const stepInterval = duration / loadingMessages.length; // 確保在時限內切換完畢
+            const stepInterval = duration / loadingMessages.length;
 
             loadingInterval = setInterval(() => {
-                loadingTextElement.style.opacity = 0; // 開始淡出
+                loadingTextElement.style.opacity = 0;
 
                 setTimeout(() => {
                     loadingTextElement.innerText = loadingMessages[index];
-                    loadingTextElement.style.opacity = 1; // 淡入新文字
+                    loadingTextElement.style.opacity = 1;
                     index = (index + 1) % loadingMessages.length;
-                }, 300); // 延遲 300ms 讓淡出/淡入效果更明顯
+                }, 300);
             }, stepInterval);
         }
 
-        // 5. 處理圖片與模擬評分
+        // 5. 處理圖片與模擬評分 (保留)
         async function processImage(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // UI 切換：顯示 Loading
+            if (loadingInterval) clearInterval(loadingInterval); // 確保在新的 processImage 啟動前，舊的計時器被清除
+
             document.getElementById('uploadZone').style.display = 'none';
             document.getElementById('loadingZone').style.display = 'block';
 
-            // 圖片預覽
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('displayImage').src = e.target.result;
 
-                const processingTime = Math.floor(Math.random() * 3000) + 3000; // 模擬 3000ms ~ 6000ms
+                const processingTime = Math.floor(Math.random() * 3000) + 3000;
                 
-                // 啟動載入訊息序列
                 startLoadingSequence(processingTime); 
 
                 setTimeout(() => {
-                    clearInterval(loadingInterval); // 停止訊息切換
+                    clearInterval(loadingInterval);
 
-                    const score = Math.floor(Math.random() * 71) + 30; // 30-100
+                    const score = Math.floor(Math.random() * 71) + 30;
                     
                     const aiResult = {
                         score: score,
-                        commentHtml: generateDetailedComment(score) // 使用結構化評語
+                        commentHtml: generateDetailedComment(score)
                     };
 
                     showResult(aiResult);
@@ -387,7 +391,7 @@
             reader.readAsDataURL(file);
         }
         
-        // 6. 顯示結果動畫
+        // 6. 顯示結果動畫 (保留)
         function showResult(data) {
             document.getElementById('loadingZone').style.display = 'none';
             document.getElementById('resultZone').style.display = 'block';
@@ -397,7 +401,7 @@
 
             document.getElementById('scoreText').innerText = score;
             document.getElementById('chineseGradeDisplay').innerText = chineseGrade;
-            document.getElementById('commentText').innerHTML = data.commentHtml; // **使用 innerHTML 顯示結構化內容**
+            document.getElementById('commentText').innerHTML = data.commentHtml;
 
             let color;
             if (score >= 85) color = 'var(--score-color-high)';
@@ -413,7 +417,7 @@
                 `conic-gradient(${color} ${deg}deg, #e2e8f0 0deg)`;
         }
 
-        // 7. 分享功能 (與上次相同)
+        // 7. 分享功能 (保留)
         async function shareResult() {
             const appContainer = document.getElementById('appContainer');
             const shareButton = document.querySelector('.btn-share');
@@ -467,17 +471,16 @@
             });
         }
 
-        // 8. 重置 (再次評分)
+        // 8. 重置 (再次評分) (保留)
         function resetApp() {
             document.getElementById('resultZone').style.display = 'none';
             document.getElementById('loadingZone').style.display = 'none';
             document.getElementById('uploadZone').style.display = 'block';
             document.getElementById('fileInput').value = '';
-            // 清理計時器，防止計時器在背景跑
             if (loadingInterval) clearInterval(loadingInterval); 
         }
 
-        // 9. 拖曳上傳功能
+        // 9. 拖曳上傳功能 (保留)
         const uploadZone = document.getElementById('uploadZone');
         uploadZone.addEventListener('dragover', (e) => {
             e.preventDefault();
